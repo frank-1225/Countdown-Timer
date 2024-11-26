@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            transition: background-color 0.3s ease;
+            background-color: #ffffff; /* 修改背景颜色 */
+        }
+        .timer {
+            font-size: 200px; /* 修改字体大小 */
+            font-weight: bold;
+            color: #0000ff; /* 修改字体颜色 */
+            transition: transform 0.2s ease, color 0.3s ease;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="countdown">00:00</div>
+
+    <audio id="alert-sound">
+        <source src="bell.wav" type="audio/wav">
+    </audio>
+
+    <script>
+        // 可修改的默认参数
+        const defaultMinutes = 10; // 倒计时分钟数
+        const alertAt = 60; // 提醒时间（秒）
+        const fontSizeStep = 5; // 滚轮调整字号的步长
+
+        const countdownElement = document.getElementById('countdown');
+        const alertSound = document.getElementById('alert-sound');
+
+        let timer;
+        let totalSeconds = defaultMinutes * 60;
+
+        // 初始化倒计时显示
+        updateDisplay();
+
+        // 倒计时逻辑
+        function startCountdown() {
+            clearInterval(timer); // 重置已有计时器
+
+            timer = setInterval(() => {
+                totalSeconds--;
+                updateDisplay();
+
+                if (totalSeconds === alertAt) {
+                    alertSound.play();
+                }
+
+                if (totalSeconds <= 0) {
+                    clearInterval(timer);
+                    alertSound.play();
+                }
+            }, 1000);
+        }
+
+        // 更新倒计时显示
+        function updateDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            countdownElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // 滚轮调整字号大小
+        countdownElement.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const currentSize = parseFloat(window.getComputedStyle(countdownElement).fontSize);
+            const newSize = currentSize + (event.deltaY < 0 ? fontSizeStep : -fontSizeStep);
+            if (newSize >= 20 && newSize <= 5000) { // 字号限制范围
+                countdownElement.style.fontSize = `${newSize}px`;
+            }
+        });
+
+        // 点击倒计时区域开始倒计时
+        countdownElement.addEventListener('click', () => {
+            startCountdown();
+        });
+    </script>
+</body>
+</html>
